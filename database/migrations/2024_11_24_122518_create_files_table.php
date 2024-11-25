@@ -16,7 +16,6 @@ return new class extends Migration
             $table->string('name');
             $table->string('type');
             $table->string('content');
-            $table->string('file');
             $table->boolean('available')->nullable()->default(1);
             $table->unsignedInteger('creater_id');
             $table->timestamps();
