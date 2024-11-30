@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\file;
 use App\Services\UserService;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -49,5 +48,24 @@ class UserController extends Controller
             'access_token' => $accessToken,
             'user_data' => $user_data
         ]);
+    }
+
+    public function login(Request $request)
+    {
+        $accessToken = $this->userService->checkCredential($request->password, $request->email);
+
+        if ($accessToken) {
+            $user_data = User::where('id', auth()->user()->id)->first();
+            return response()->json([
+                'status' => true,
+                'access_token' => $accessToken,
+                'user_data' => $user_data
+            ]);
+        } else {
+            return response()->json([
+                'status' => false,
+                'message' => 'something went error',
+            ]);
+        }
     }
 }

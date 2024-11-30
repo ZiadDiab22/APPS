@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api;
 use App\Services\FileService;
 use App\Http\Controllers\Controller;
 use App\Models\file;
-use App\Models\group;
 use Illuminate\Http\Request;
 
 class FileController extends Controller
