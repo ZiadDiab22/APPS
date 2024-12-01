@@ -169,4 +169,53 @@ class GroupController extends Controller
             'group_files' => $users
         ]);
     }
+
+    public function showGroupFiles($id)
+    {
+        if (!(users_groups::where('group_id', $id)->where('user_id', auth()->user()->id)->exists())) {
+            return response()->json([
+                'status' => false,
+                'message' => "You dont have access to this group."
+            ]);
+        }
+
+        $files = files_groups::where('group_id', $id)
+            ->join('files', 'files.id', 'file_id')
+            ->get([
+                'file_id',
+                'files.creater_id as file_creater_id',
+                'files.name as file_name',
+                'content',
+                'files.type',
+                'available',
+                'reserver_id',
+                'files.type',
+                'files.created_at',
+                'files.updated_at'
+            ]);
+
+        if (group::where('id', $id)->where('creater_id', auth()->user()->id)->exists()) {
+            $users = users_groups::where('group_id', $id)
+                ->join('users as u', 'u.id', 'user_id')->get([
+                    'u.id',
+                    'u.name',
+                    'email',
+                    'u.created_at',
+                    'u.updated_at'
+                ]);
+
+            return response([
+                'status' => true,
+                'message' => "done successfully",
+                'files' => $files,
+                'users' => $users,
+            ], 200);
+        }
+
+        return response([
+            'status' => true,
+            'message' => "done successfully",
+            'files' => $files,
+        ], 200);
+    }
 }
