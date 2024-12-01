@@ -15,11 +15,14 @@ return new class extends Migration
             $table->increments('id');
             $table->string('name');
             $table->string('type');
-            $table->string('content');
+            $table->longText('content');
             $table->boolean('available')->nullable()->default(1);
             $table->unsignedInteger('creater_id');
+            $table->unsignedInteger('reserver_id')->nullable()->default(null);
             $table->timestamps();
             $table->foreign('creater_id')->references('id')
+                ->on('users')->onDelete('cascade');
+            $table->foreign('reserver_id')->references('id')
                 ->on('users')->onDelete('cascade');
         });
     }

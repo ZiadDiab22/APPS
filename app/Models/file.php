@@ -14,6 +14,7 @@ class file extends Model
         'type',
         'content',
         'available',
-        'creater_id'
+        'creater_id',
+        'reserver_id'
     ];
 }
