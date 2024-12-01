@@ -8,4 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 class files_groups extends Model
 {
     use HasFactory;
+    public $timestamps = false;
+
+    protected $fillable = [
+        'group_id',
+        'file_id'
+    ];
 }

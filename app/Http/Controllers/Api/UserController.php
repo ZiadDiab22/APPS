@@ -68,4 +68,15 @@ class UserController extends Controller
             ]);
         }
     }
+
+    public function showUsers()
+    {
+
+        $users = User::where('id', '!=', auth()->user()->id)->get(['id', 'name', 'email']);
+
+        return response()->json([
+            'status' => true,
+            'users' => $users
+        ]);
+    }
 }

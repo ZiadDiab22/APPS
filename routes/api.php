@@ -22,4 +22,7 @@ Route::group(["middleware" => ["auth:api"]], function () {
     Route::get("showGroups", [GroupController::class, "showGroups"]);
     Route::get("showFiles", [FileController::class, "showFiles"]);
     Route::get("togglefreeFile/{id}/", [FileController::class, "togglefreeFile"]);
+    Route::post("addFiletoGroup", [GroupController::class, "addFiletoGroup"]);
+    Route::post("addMembertoGroup", [GroupController::class, "addMembertoGroup"]);
+    Route::get("showUsers", [UserController::class, "showUsers"]);
 });
