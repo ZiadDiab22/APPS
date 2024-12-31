@@ -95,7 +95,7 @@ class FileController extends Controller
         if (!(file::where('id', $id)->exists())) {
             return response([
                 'status' => false,
-                'message' => 'not found, wrong id'
+                'message' => 'not found, wrong file id'
             ], 200);
         }
 
