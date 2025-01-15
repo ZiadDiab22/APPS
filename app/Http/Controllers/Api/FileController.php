@@ -125,42 +125,53 @@ class FileController extends Controller
 
         $path = storage_path('app/uploads/' . $file->name);
 
-        return response()->download($path, $file->name);
+        response()->download($path, $file->name);
+        return response()->json(['status' => true, 'message' => $path]);
     }
 
-    public function checkin($id)
+    public function checkin(Request $request)
     {
-        if (!$file = File::find($id)) {
-            return response()->json(['error' => 'File not found'], 404);
-        }
+        foreach ($request->ids as $id) {
+            if (!$file = File::find($id)) {
+                return response()->json(['error' => "File {$id} not found"], 404);
+            }
 
-        if ($file->available == 0) return response()->json(['error' => 'File not available']);
+            if ($file->available == 0) return response()->json(['error' => "File {$id} not available"]);
 
-        if ($file->creater_id != auth()->user()->id) {
+            if ($file->creater_id != auth()->user()->id) {
 
-            $users_groups = users_groups::where('user_id', auth()->user()->id)->get(['group_id']);
-            $groupIds = $users_groups->pluck('group_id');
-            $result = $groupIds->toArray();
+                $users_groups = users_groups::where('user_id', auth()->user()->id)->get(['group_id']);
+                $groupIds = $users_groups->pluck('group_id');
+                $result = $groupIds->toArray();
 
-            $file_groups = files_groups::where('file_id', $file->id)->get(['group_id']);
-            $fileIds = $file_groups->pluck('group_id');
-            $result2 = $fileIds->toArray();
+                $file_groups = files_groups::where('file_id', $file->id)->get(['group_id']);
+                $fileIds = $file_groups->pluck('group_id');
+                $result2 = $fileIds->toArray();
 
-            if (empty(array_intersect($result, $result2))) {
-                return response()->json(['message' => 'you dont have access to file\'s groups']);
+                if (empty(array_intersect($result, $result2))) {
+                    return response()->json(['message' => "you dont have access to file {$id} groups"]);
+                }
             }
         }
-        $file->available = 0;
-        $file->reserver_id = auth()->user()->id;
-        $file->save();
 
-        $path = storage_path('app/uploads/' . $file->name);
+        $paths = [];
 
-        response()->download($path, $file->name);
+        foreach ($request->ids as $id) {
+            $file = File::find($id);
+            $file->available = 0;
+            $file->reserver_id = auth()->user()->id;
+            $file->save();
+
+            $path = storage_path('app/uploads/' . $file->name);
+
+            response()->download($path, $file->name);
+            $paths[] = $path;
+        }
 
         return response()->json([
             'status' => true,
-            'message' => 'done successfully'
+            'message' => 'done successfully',
+            'paths' => $paths
         ]);
     }
 

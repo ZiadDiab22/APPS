@@ -203,12 +203,17 @@ class GroupController extends Controller
                     'u.created_at',
                     'u.updated_at'
                 ]);
-
+            $allUsers = User::get();
+            $myFiles = file::where('creater_id', auth()->user()->id)->get();
+            $groupInfo = group::where('id', $id)->get();
             return response([
                 'status' => true,
                 'message' => "done successfully",
                 'files' => $files,
+                'myFiles' => $myFiles,
                 'users' => $users,
+                'allUsers' => $allUsers,
+                'groupInfo' => $groupInfo
             ], 200);
         }
 
