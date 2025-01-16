@@ -17,7 +17,6 @@ return new class extends Migration
             $table->unsignedInteger('file_id');
             $table->enum('operation', ['F', 'R']);
             $table->timestamps();
-
             $table->foreign('user_id')->references('id')
                 ->on('users')->onDelete('cascade');
             $table->foreign('file_id')->references('id')

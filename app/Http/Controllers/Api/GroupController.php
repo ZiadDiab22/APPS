@@ -11,7 +11,6 @@ use App\Models\users_groups;
 use Illuminate\Http\Request;
 use App\Services\GroupService;
 
-
 class GroupController extends Controller
 {
     protected $groupService;

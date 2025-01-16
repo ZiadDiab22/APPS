@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\notification;
 use App\Services\UserService;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -77,6 +78,17 @@ class UserController extends Controller
         return response()->json([
             'status' => true,
             'users' => $users
+        ]);
+    }
+
+    public function showNotification()
+    {
+        notification::where('user_id', auth()->user()->id)->update(['viewed' => 1]);
+        $data = notification::where('user_id', auth()->user()->id)->get();
+
+        return response()->json([
+            'status' => true,
+            'users' => $data
         ]);
     }
 }

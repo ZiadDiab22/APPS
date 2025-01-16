@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Services\FileService;
+use App\Services\NotificationService;
 use App\Http\Controllers\Controller;
 use App\Models\file;
 use App\Models\files_groups;
@@ -13,10 +14,12 @@ use Illuminate\Support\Facades\Storage;
 class FileController extends Controller
 {
     protected $fileService;
+    protected $notificationService;
 
-    public function __construct(FileService $fileService)
+    public function __construct(FileService $fileService, NotificationService $notificationService)
     {
         $this->fileService = $fileService;
+        $this->notificationService = $notificationService;
     }
 
     public function addFile(Request $request)
@@ -161,6 +164,7 @@ class FileController extends Controller
             $file->available = 0;
             $file->reserver_id = auth()->user()->id;
             $file->save();
+            $this->notificationService->sendNotification($id, auth()->user()->id, auth()->user()->name, $file->name, false);
 
             $path = storage_path('app/uploads/' . $file->name);
 
@@ -183,29 +187,41 @@ class FileController extends Controller
         ]);
 
         if (!$file = File::find($request->file_id)) {
-            return response()->json(['error' => 'File not found'], 404);
+            return response()->json([
+                'status' => false,
+                'error' => 'File not found'
+            ], 404);
         }
 
-        if ($file->reserver_id != auth()->user()->id) return response()->json(['error' => 'you don\'t have access to this file']);
+        if ($file->reserver_id != auth()->user()->id) return response()->json([
+            'status' => false,
+            'error' => 'you don\'t have access to this file'
+        ]);
+
+        $file2 = $request->file('file');
+        if ($file->name != $file2->getClientOriginalName())
+            return response()->json([
+                'status' => false,
+                'error' => 'The modified file must have the same name and extension as the original file.'
+            ]);
 
         $file->reserver_id = null;
         $file->available = 1;
         $file->save();
 
-        $file2 = $request->file('file');
+        $this->notificationService->sendNotification($file->id, auth()->user()->id, auth()->user()->name, $file->name, true);
 
         $data = [
-            'name' => $file2->getClientOriginalName(),
-            'type' => $file2->getClientOriginalExtension(),
             'content' => file_get_contents($file2->getRealPath()),
         ];
 
         $file->update($data);
 
-        Storage::put('uploads/' . $data['name'], $data['content']);
+        Storage::put('uploads/' . $file->name, $data['content']);
 
         $files = file::where('creater_id', auth()->user()->id)->get();
         return response()->json([
+            'status' => true,
             'message' => 'done successfully',
             'file' => $files,
         ]);

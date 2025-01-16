@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('text');
             $table->unsignedInteger('user_id');
             $table->boolean('viewed')->nullable()->default(0);
+            $table->timestamps();
             $table->foreign('user_id')->references('id')
                 ->on('users')->onDelete('cascade');
         });
