@@ -9,6 +9,7 @@ use App\Models\file;
 use App\Models\files_groups;
 use App\Models\users_groups;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class FileController extends Controller
@@ -161,9 +162,11 @@ class FileController extends Controller
 
         foreach ($request->ids as $id) {
             $file = File::find($id);
-            $file->available = 0;
-            $file->reserver_id = auth()->user()->id;
-            $file->save();
+            DB::transaction(function () use ($file) {
+                $file->available = 0;
+                $file->reserver_id = auth()->user()->id;
+                $file->save();
+            });
             $this->notificationService->sendNotification($id, auth()->user()->id, auth()->user()->name, $file->name, false);
 
             $path = storage_path('app/uploads/' . $file->name);
@@ -205,9 +208,12 @@ class FileController extends Controller
                 'error' => 'The modified file must have the same name and extension as the original file.'
             ]);
 
-        $file->reserver_id = null;
-        $file->available = 1;
-        $file->save();
+        DB::transaction(function () use ($file) {
+            $file->reserver_id = null;
+            $file->available = 1;
+            $file->save();
+        });
+
 
         $this->notificationService->sendNotification($file->id, auth()->user()->id, auth()->user()->name, $file->name, true);
 

@@ -29,5 +29,8 @@ Route::group(["middleware" => ["auth:api"]], function () {
     Route::post("checkin", [FileController::class, "checkin"]);
     Route::post("checkout", [FileController::class, "checkout"]);
     Route::get("showNotification", [UserController::class, "showNotification"]);
+    Route::post("showFileReport", [UserController::class, "showFileReport"]);
+    Route::post("showUsersReport", [UserController::class, "showUsersReport"]);
 });
+Route::post("showGroupReport", [UserController::class, "showGroupReport"]);
 Route::get("downloadFile/{id}/", [FileController::class, "downloadFile"]);
