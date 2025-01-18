@@ -61,7 +61,9 @@ class GroupController extends Controller
 
     public function showGroups()
     {
-        $groups = group::where('creater_id', auth()->user()->id)->get();
+        $groups = users_groups::where('user_id', auth()->user()->id)
+        ->join('groups as g','g.id','group_id')
+        ->get(['g.id','user_id','name','creater_id','access_type_id']);
 
         return response([
             'status' => true,

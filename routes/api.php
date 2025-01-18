@@ -31,6 +31,10 @@ Route::group(["middleware" => ["auth:api"]], function () {
     Route::get("showNotification", [UserController::class, "showNotification"]);
     Route::post("showFileReport", [UserController::class, "showFileReport"]);
     Route::post("showUsersReport", [UserController::class, "showUsersReport"]);
+    Route::post("showGroupReport", [UserController::class, "showGroupReport"]);
+    Route::post("addFileRequest", [FileController::class, "addFileRequest"]);
+    Route::get("showFileRequests/{id}", [FileController::class, "showFileRequests"]);
+    Route::get("acceptFileRequest/{id}", [FileController::class, "acceptFileRequest"]);
+    Route::get("deleteFileRequest/{id}", [FileController::class, "deleteFileRequest"]);
 });
-Route::post("showGroupReport", [UserController::class, "showGroupReport"]);
 Route::get("downloadFile/{id}/", [FileController::class, "downloadFile"]);

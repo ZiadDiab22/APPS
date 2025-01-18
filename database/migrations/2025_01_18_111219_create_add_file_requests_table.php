@@ -11,16 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('operations', function (Blueprint $table) {
+        Schema::create('add_file_requests', function (Blueprint $table) {
             $table->increments('id');
-            $table->unsignedInteger('file_id');
             $table->unsignedInteger('user_id');
-            $table->longText('content');
-            $table->date('date');
-            $table->foreign('file_id')->references('id')
-                ->on('files')->onDelete('cascade');
+            $table->unsignedInteger('group_id');
+            $table->string('name');
+            $table->string('type');
+            $table->string('content');
+            $table->boolean('accepted')->default(false);
+            $table->timestamps();
             $table->foreign('user_id')->references('id')
                 ->on('users')->onDelete('cascade');
+            $table->foreign('group_id')->references('id')
+                ->on('groups')->onDelete('cascade');
         });
     }
 
@@ -29,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('operations');
+        Schema::dropIfExists('add_file_requests');
     }
 };

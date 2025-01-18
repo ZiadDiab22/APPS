@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Api;
 use App\Services\FileService;
 use App\Services\NotificationService;
 use App\Http\Controllers\Controller;
+use App\Models\add_file_request;
 use App\Models\file;
 use App\Models\files_groups;
+use App\Models\group;
 use App\Models\users_groups;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -230,6 +232,136 @@ class FileController extends Controller
             'status' => true,
             'message' => 'done successfully',
             'file' => $files,
+        ]);
+    }
+
+    public function addFileRequest(Request $request)
+    {
+        $request->validate([
+            'group_id' => 'required',
+            'file' => 'required|file|mimes:txt|max:10240',
+        ]);
+
+        if (group::where('creater_id', auth()->user()->id)->where('id', $request->group_id)->exists()) {
+            return response()->json([
+                'status' => false,
+                'message' => "You are an admin in this group and you dont need request to add files."
+            ], 200);
+        }
+
+        if (!(users_groups::where('user_id', auth()->user()->id)->where('group_id', $request->group_id)->exists())) {
+            return response()->json([
+                'status' => false,
+                'message' => "You dont have access to this group"
+            ], 200);
+        }
+
+        $file = $request->file('file');
+        $f = add_file_request::create([
+            "user_id" => auth()->user()->id,
+            "group_id" => $request->group_id,
+            "name" => $file->getClientOriginalName(),
+            "type" => $file->getClientOriginalExtension(),
+            "content" => file_get_contents($file->getRealPath()),
+        ]);
+
+        Storage::put('uploads/' . $f->name, $f->content);
+
+        $files = add_file_request::where('user_id', auth()->user()->id)->get();
+        return response()->json([
+            'message' => 'done successfully',
+            'files' => $files,
+        ]);
+    }
+
+    public function showFileRequests($id)
+    {
+        if (!(group::where('creater_id', auth()->user()->id)->where('id', $id)->exists())) {
+            return response()->json([
+                'status' => false,
+                'message' => "You dont have access to this group info."
+            ], 200);
+        }
+
+        $files = add_file_request::where('group_id', $id)->get();
+
+        foreach ($files as $f) {
+            $f['path'] = storage_path('app/uploads/' . $f['name']);
+        }
+
+        return response()->json([
+            'message' => 'done successfully',
+            'files' => $files,
+        ]);
+    }
+
+    public function acceptFileRequest($id)
+    {
+        if (!$req = add_file_request::find($id)) {
+            return response()->json([
+                'status' => false,
+                'error' => 'Request not found , Wrong id.'
+            ], 404);
+        }
+
+        if (!(group::where('creater_id', auth()->user()->id)->where('id', $req->group_id)->exists())) {
+            return response()->json([
+                'status' => false,
+                'message' => "You dont have access to group info."
+            ], 200);
+        }
+
+        $req->accepted = 1;
+        $req->save();
+
+        file::create([
+            "name" => $req->name,
+            "content" => $req->content,
+            "type" => $req->type,
+            "creater_id" => $req->user_id,
+        ]);
+
+        $files = add_file_request::where('group_id', $req->group_id)->get();
+
+        foreach ($files as $f) {
+            $f['path'] = storage_path('app/uploads/' . $f['name']);
+        }
+
+        return response()->json([
+            'message' => 'done successfully',
+            'files' => $files,
+        ]);
+    }
+
+    public function deleteFileRequest($id)
+    {
+        if (!$req = add_file_request::find($id)) {
+            return response()->json([
+                'status' => false,
+                'error' => 'Request not found , Wrong id.'
+            ], 404);
+        }
+
+        if (!(group::where('creater_id', auth()->user()->id)->where('id', $req->group_id)->exists())) {
+            return response()->json([
+                'status' => false,
+                'message' => "You dont have access to group info."
+            ], 200);
+        }
+
+        if ($req->accepted == 0) Storage::delete('uploads/' . $req->name);
+
+        add_file_request::where('id', $id)->delete();
+
+        $files = add_file_request::where('group_id', $req->group_id)->get();
+
+        foreach ($files as $f) {
+            $f['path'] = storage_path('app/uploads/' . $f['name']);
+        }
+
+        return response()->json([
+            'message' => 'done successfully',
+            'files' => $files,
         ]);
     }
 }

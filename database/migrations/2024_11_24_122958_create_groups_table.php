@@ -15,7 +15,7 @@ return new class extends Migration
             $table->increments('id');
             $table->string('name');
             $table->unsignedInteger('creater_id');
-            $table->unsignedInteger('access_type_id');
+            $table->unsignedInteger('access_type_id')->default(1);
             $table->foreign('creater_id')->references('id')
                 ->on('users')->onDelete('cascade');
             $table->foreign('access_type_id')->references('id')
