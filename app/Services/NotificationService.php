@@ -10,9 +10,9 @@ use Illuminate\Support\Facades\Storage;
 
 class NotificationService
 {
-  public function sendNotification($file_id, $user_id, $user_name, $file_name, $free)
+  public function sendNotification($file_id, $user_id, $user_name, $file_name, $content, $free)
   {
-    $this->sendReports($file_id, $user_id, $free);
+    $this->sendReports($file_id, $user_id, $content, $free);
 
     $file_groups = files_groups::where('file_id', $file_id)->get(['group_id']);
     $ids = $file_groups->pluck('group_id');
@@ -36,19 +36,20 @@ class NotificationService
     }
   }
 
-  public function sendReports($file_id, $user_id, $free)
+  public function sendReports($file_id, $user_id, $content, $free)
   {
     if ($free) {
       report::create([
         'user_id' => $user_id,
         'file_id' => $file_id,
-        'operation' => "F",
+        'old_content' => $content,
+        'operation' => "checkout",
       ]);
     } else {
       report::create([
         'user_id' => $user_id,
         'file_id' => $file_id,
-        'operation' => "R",
+        'operation' => "checkin",
       ]);
     }
   }

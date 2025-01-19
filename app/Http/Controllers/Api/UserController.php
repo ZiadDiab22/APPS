@@ -146,6 +146,7 @@ class UserController extends Controller
                 'f.name as file_name',
                 'f.type',
                 'content',
+                'old_content',
                 'operation',
                 'reports.created_at',
                 'reports.updated_at'
@@ -199,6 +200,7 @@ class UserController extends Controller
                 'f.name as file_name',
                 'f.type',
                 'content',
+                'old_content',
                 'operation',
                 'reports.created_at',
                 'reports.updated_at'

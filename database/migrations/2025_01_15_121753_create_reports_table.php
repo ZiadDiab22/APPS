@@ -15,7 +15,8 @@ return new class extends Migration
             $table->increments('id');
             $table->unsignedInteger('user_id');
             $table->unsignedInteger('file_id');
-            $table->enum('operation', ['F', 'R']);
+            $table->longText('old_content')->nullable()->default(null);
+            $table->enum('operation', ['checkin', 'checkout']);
             $table->timestamps();
             $table->foreign('user_id')->references('id')
                 ->on('users')->onDelete('cascade');

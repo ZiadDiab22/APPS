@@ -169,7 +169,7 @@ class FileController extends Controller
                 $file->reserver_id = auth()->user()->id;
                 $file->save();
             });
-            $this->notificationService->sendNotification($id, auth()->user()->id, auth()->user()->name, $file->name, false);
+            $this->notificationService->sendNotification($id, auth()->user()->id, auth()->user()->name, $file->name, false, false);
 
             $path = storage_path('app/uploads/' . $file->name);
 
@@ -198,10 +198,11 @@ class FileController extends Controller
             ], 404);
         }
 
-        if ($file->reserver_id != auth()->user()->id) return response()->json([
-            'status' => false,
-            'error' => 'you don\'t have access to this file'
-        ]);
+        if ($file->reserver_id != auth()->user()->id)
+            return response()->json([
+                'status' => false,
+                'error' => 'you don\'t have access to this file'
+            ]);
 
         $file2 = $request->file('file');
         if ($file->name != $file2->getClientOriginalName())
@@ -217,7 +218,7 @@ class FileController extends Controller
         });
 
 
-        $this->notificationService->sendNotification($file->id, auth()->user()->id, auth()->user()->name, $file->name, true);
+        $this->notificationService->sendNotification($file->id, auth()->user()->id, auth()->user()->name, $file->name, $file->content, true);
 
         $data = [
             'content' => file_get_contents($file2->getRealPath()),

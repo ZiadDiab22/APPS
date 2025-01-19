@@ -17,7 +17,7 @@ return new class extends Migration
             $table->unsignedInteger('group_id');
             $table->string('name');
             $table->string('type');
-            $table->string('content');
+            $table->longText('content');
             $table->boolean('accepted')->default(false);
             $table->timestamps();
             $table->foreign('user_id')->references('id')
