@@ -46,7 +46,11 @@ class FileController extends Controller
 
     public function showFiles()
     {
-        $files = file::where('creater_id', auth()->user()->id)->get();
+        if (auth()->user()->type_id == 1) {
+            $files = file::get();
+        } else {
+            $files = file::where('creater_id', auth()->user()->id)->get();
+        }
 
         return response([
             'status' => true,
@@ -54,7 +58,6 @@ class FileController extends Controller
         ], 200);
     }
 
-    // Show the list of uploaded files
     public function index()
     {
         $files = $this->fileService->getAllFiles();
@@ -105,15 +108,22 @@ class FileController extends Controller
             ], 200);
         }
 
-        if (!(file::where('id', $id)->where('creater_id', auth()->user()->id)->exists())) {
-            return response([
-                'status' => false,
-                'message' => 'you dont have access to this file'
-            ], 200);
+        if (auth()->user()->type_id != 1) {
+            if (!(file::where('id', $id)->where('creater_id', auth()->user()->id)->exists())) {
+                return response([
+                    'status' => false,
+                    'message' => 'you dont have access to this file'
+                ], 200);
+            }
         }
 
         file::where('id', $id)->delete();
-        $files = file::where('creater_id', auth()->user()->id)->get();
+
+        if (auth()->user()->type_id != 1) {
+            $files = file::where('creater_id', auth()->user()->id)->get();
+        } else {
+            $files = file::get();
+        }
 
         return response([
             'status' => true,
@@ -315,11 +325,16 @@ class FileController extends Controller
         $req->accepted = 1;
         $req->save();
 
-        file::create([
+        $file = file::create([
             "name" => $req->name,
             "content" => $req->content,
             "type" => $req->type,
             "creater_id" => $req->user_id,
+        ]);
+
+        files_groups::create([
+            "file_id" => $file->id,
+            "group_id" => $req->group_id,
         ]);
 
         $files = add_file_request::where('group_id', $req->group_id)->get();

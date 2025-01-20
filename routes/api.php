@@ -19,6 +19,7 @@ Route::group(["middleware" => ["auth:api"]], function () {
     Route::post("addGroup", [GroupController::class, "addGroup"])->middleware('validate.group.inputs');
     Route::get("deleteGroup/{id}", [GroupController::class, "deleteGroup"]);
     Route::get("deleteFile/{id}", [FileController::class, "deleteFile"]);
+    Route::get("deleteUser/{id}", [UserController::class, "deleteUser"]);
     Route::get("showGroups", [GroupController::class, "showGroups"]);
     Route::get("showGroupFiles/{id}", [GroupController::class, "showGroupFiles"]);
     Route::get("showFiles", [FileController::class, "showFiles"]);

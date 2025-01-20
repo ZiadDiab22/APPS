@@ -42,15 +42,22 @@ class GroupController extends Controller
             ], 200);
         }
 
-        if (!(group::where('id', $id)->where('creater_id', auth()->user()->id)->exists())) {
-            return response([
-                'status' => false,
-                'message' => 'you dont have access to this group'
-            ], 200);
+        if (auth()->user()->type_id != 1) {
+            if (!(group::where('id', $id)->where('creater_id', auth()->user()->id)->exists())) {
+                return response([
+                    'status' => false,
+                    'message' => 'you dont have access to this group'
+                ], 200);
+            }
         }
 
         group::where('id', $id)->delete();
-        $groups = group::where('creater_id', auth()->user()->id)->get();
+
+        if (auth()->user()->type_id != 1) {
+            $groups = group::where('creater_id', auth()->user()->id)->get();
+        } else {
+            $groups = group::get();
+        }
 
         return response([
             'status' => true,
@@ -61,9 +68,13 @@ class GroupController extends Controller
 
     public function showGroups()
     {
-        $groups = users_groups::where('user_id', auth()->user()->id)
-        ->join('groups as g','g.id','group_id')
-        ->get(['g.id','user_id','name','creater_id','access_type_id']);
+        if (auth()->user()->type_id == 1) {
+            $groups = group::get();
+        } else {
+            $groups = users_groups::where('user_id', auth()->user()->id)
+                ->join('groups as g', 'g.id', 'group_id')
+                ->get(['g.id', 'name', 'creater_id', 'access_type_id']);
+        }
 
         return response([
             'status' => true,

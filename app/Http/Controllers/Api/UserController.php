@@ -31,7 +31,6 @@ class UserController extends Controller
             'name' => 'required',
             'email' => 'email|required',
             'password' => 'required',
-            'type_id' => 'required',
         ]);
 
         if (User::where('email', $request->email)->exists()) {
@@ -42,6 +41,7 @@ class UserController extends Controller
         }
 
         $validatedData['password'] = bcrypt($request->password);
+        $validatedData['type_id'] = 2;
 
         $user = User::create($validatedData);
 
@@ -77,7 +77,6 @@ class UserController extends Controller
 
     public function showUsers()
     {
-
         $users = User::where('id', '!=', auth()->user()->id)->get(['id', 'name', 'email']);
 
         return response()->json([
@@ -210,5 +209,32 @@ class UserController extends Controller
             'status' => true,
             'data' => $data
         ]);
+    }
+
+    public function deleteUser($id)
+    {
+        if (auth()->user()->type_id != 1) {
+            return response([
+                'status' => false,
+                'message' => 'not authorized'
+            ], 200);
+        }
+
+        if (!(User::where('id', $id)->exists())) {
+            return response([
+                'status' => false,
+                'message' => 'not found, wrong id'
+            ], 200);
+        }
+
+        User::where('id', $id)->delete();
+
+        $users = User::get();
+
+        return response([
+            'status' => true,
+            'message' => "done successfully",
+            'groups' => $users,
+        ], 200);
     }
 }
