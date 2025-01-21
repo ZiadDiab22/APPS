@@ -39,3 +39,4 @@ Route::group(["middleware" => ["auth:api"]], function () {
     Route::get("deleteFileRequest/{id}", [FileController::class, "deleteFileRequest"]);
 });
 Route::get("downloadFile/{id}/", [FileController::class, "downloadFile"]);
+Route::get("export", [UserController::class, "export"]);

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\notification;
 use App\Services\UserService;
+use App\Services\FileService;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Models\file;
@@ -12,17 +13,16 @@ use App\Models\files_groups;
 use App\Models\group;
 use App\Models\report;
 use App\Models\users_groups;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
-
     protected $userService;
+    protected $fileService;
 
-    public function __construct(UserService $userService)
+    public function __construct(UserService $userService, FileService $fileService)
     {
         $this->userService = $userService;
+        $this->fileService = $fileService;
     }
 
     public function register(Request $request)
@@ -151,6 +151,10 @@ class UserController extends Controller
                 'reports.updated_at'
             ]);
 
+        if ($request->CSV) {
+            $this->fileService->exportCSV($data);
+        }
+
         return response()->json([
             'status' => true,
             'data' => $data
@@ -205,6 +209,10 @@ class UserController extends Controller
                 'reports.updated_at'
             ]);
 
+        if ($request->CSV) {
+            $this->fileService->exportCSV($data);
+        }
+
         return response()->json([
             'status' => true,
             'data' => $data
@@ -236,5 +244,50 @@ class UserController extends Controller
             'message' => "done successfully",
             'groups' => $users,
         ], 200);
+    }
+
+    public function export()
+    {
+        $filename = "apps_database_" . substr(str_replace('.', '', microtime(true)), -4) . ".csv";
+        header('Content-Type: text/csv');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Content-Type: text/html; charset=utf-8');
+        $output = fopen('php://output', 'w');
+        fputs($output, "\xEF\xBB\xBF");
+
+        $data = Report::join('users as u', 'u.id', 'user_id')
+            ->join('files as f', 'f.id', 'file_id')
+            ->get([
+                'reports.id',
+                'user_id',
+                'u.name as user_name',
+                'u.email as user_email',
+                'file_id',
+                'f.name as file_name',
+                'f.type',
+                'content',
+                'old_content',
+                'operation',
+                'reports.created_at',
+                'reports.updated_at'
+            ]);
+
+        fputcsv($output, ['Reports'], ';');
+        fputcsv($output, [], ';');
+
+        $array = json_decode($data, true);
+        $cols = array_keys($array[0]);
+
+        fputcsv($output, $cols, ';');
+
+        foreach ($data as $rec) {
+            $record = [];
+            $array = json_decode($rec, true);
+            $record = array_values($array);
+            fputcsv($output, $record, ';');
+        }
+
+        fclose($output);
+        exit;
     }
 }
