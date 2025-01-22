@@ -4,10 +4,8 @@
 namespace App\Services;
 
 use App\Models\File;
-use App\Models\report;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
+use Pdf;
 
 class FileService
 {

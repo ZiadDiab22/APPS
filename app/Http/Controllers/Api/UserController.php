@@ -13,6 +13,7 @@ use App\Models\files_groups;
 use App\Models\group;
 use App\Models\report;
 use App\Models\users_groups;
+use Pdf;
 
 class UserController extends Controller
 {
@@ -155,6 +156,17 @@ class UserController extends Controller
             $this->fileService->exportCSV($data);
         }
 
+        if ($request->PDF) {
+            $array = [
+                'title' => 'The following table shows the modifications made to the files, the type of modification and who made it.',
+                'date' => date('d M Y'),
+                'data' => $data
+            ];
+
+            $pdf = Pdf::loadView('pdf', $array);
+            return $pdf->download('report.pdf');
+        }
+
         return response()->json([
             'status' => true,
             'data' => $data
@@ -212,6 +224,16 @@ class UserController extends Controller
         if ($request->CSV) {
             $this->fileService->exportCSV($data);
         }
+        if ($request->PDF) {
+            $array = [
+                'title' => 'The following table shows the modifications made to the files, the type of modification and who made it.',
+                'date' => date('d M Y'),
+                'data' => $data
+            ];
+
+            $pdf = Pdf::loadView('pdf', $array);
+            return $pdf->download('report.pdf');
+        }
 
         return response()->json([
             'status' => true,
@@ -248,12 +270,12 @@ class UserController extends Controller
 
     public function export()
     {
-        $filename = "apps_database_" . substr(str_replace('.', '', microtime(true)), -4) . ".csv";
-        header('Content-Type: text/csv');
-        header('Content-Disposition: attachment; filename="' . $filename . '"');
-        header('Content-Type: text/html; charset=utf-8');
-        $output = fopen('php://output', 'w');
-        fputs($output, "\xEF\xBB\xBF");
+        // $filename = "apps_database_" . substr(str_replace('.', '', microtime(true)), -4) . ".csv";
+        // header('Content-Type: text/csv');
+        // header('Content-Disposition: attachment; filename="' . $filename . '"');
+        // header('Content-Type: text/html; charset=utf-8');
+        // $output = fopen('php://output', 'w');
+        // fputs($output, "\xEF\xBB\xBF");
 
         $data = Report::join('users as u', 'u.id', 'user_id')
             ->join('files as f', 'f.id', 'file_id')
@@ -272,22 +294,22 @@ class UserController extends Controller
                 'reports.updated_at'
             ]);
 
-        fputcsv($output, ['Reports'], ';');
-        fputcsv($output, [], ';');
+        // fputcsv($output, ['Reports'], ';');
+        // fputcsv($output, [], ';');
 
-        $array = json_decode($data, true);
-        $cols = array_keys($array[0]);
+        // $array = json_decode($data, true);
+        // $cols = array_keys($array[0]);
 
-        fputcsv($output, $cols, ';');
+        // fputcsv($output, $cols, ';');
 
-        foreach ($data as $rec) {
-            $record = [];
-            $array = json_decode($rec, true);
-            $record = array_values($array);
-            fputcsv($output, $record, ';');
-        }
+        // foreach ($data as $rec) {
+        //     $record = [];
+        //     $array = json_decode($rec, true);
+        //     $record = array_values($array);
+        //     fputcsv($output, $record, ';');
+        // }
 
-        fclose($output);
-        exit;
+        // fclose($output);
+        // exit;
     }
 }
