@@ -35,22 +35,6 @@ class GroupController extends Controller
 
     public function deleteGroup($id)
     {
-        if (!(group::where('id', $id)->exists())) {
-            return response([
-                'status' => false,
-                'message' => 'not found, wrong id'
-            ], 200);
-        }
-
-        if (auth()->user()->type_id != 1) {
-            if (!(group::where('id', $id)->where('creater_id', auth()->user()->id)->exists())) {
-                return response([
-                    'status' => false,
-                    'message' => 'you dont have access to this group'
-                ], 200);
-            }
-        }
-
         group::where('id', $id)->delete();
 
         if (auth()->user()->type_id != 1) {
@@ -97,13 +81,6 @@ class GroupController extends Controller
             ], 200);
         }
 
-        if (!(group::where('creater_id', auth()->user()->id)->where('id', $request->group_id)->exists())) {
-            return response()->json([
-                'status' => false,
-                'message' => "You dont have access to this group"
-            ], 200);
-        }
-
         if (!(file::where('creater_id', auth()->user()->id)->where('id', $request->file_id)->exists())) {
             return response()->json([
                 'status' => false,
@@ -145,13 +122,6 @@ class GroupController extends Controller
             return response()->json([
                 'status' => true,
                 'message' => "this user exists in this group already."
-            ], 200);
-        }
-
-        if (!(group::where('creater_id', auth()->user()->id)->where('id', $request->group_id)->exists())) {
-            return response()->json([
-                'status' => false,
-                'message' => "You dont have access to this group"
             ], 200);
         }
 

@@ -17,15 +17,15 @@ Route::post("login", [UserController::class, "login"])->middleware('validate.log
 Route::group(["middleware" => ["auth:api"]], function () {
     Route::post("addFile", [FileController::class, "addFile"])->middleware('validate.file.inputs');
     Route::post("addGroup", [GroupController::class, "addGroup"])->middleware('validate.group.inputs');
-    Route::get("deleteGroup/{id}", [GroupController::class, "deleteGroup"]);
+    Route::get("deleteGroup/{id}", [GroupController::class, "deleteGroup"])->middleware('validate.group.creater');
     Route::get("deleteFile/{id}", [FileController::class, "deleteFile"]);
     Route::get("deleteUser/{id}", [UserController::class, "deleteUser"]);
     Route::get("showGroups", [GroupController::class, "showGroups"]);
     Route::get("showGroupFiles/{id}", [GroupController::class, "showGroupFiles"]);
     Route::get("showFiles", [FileController::class, "showFiles"]);
     Route::get("togglefreeFile/{id}/", [FileController::class, "togglefreeFile"]);
-    Route::post("addFiletoGroup", [GroupController::class, "addFiletoGroup"]);
-    Route::post("addMembertoGroup", [GroupController::class, "addMembertoGroup"]);
+    Route::post("addFiletoGroup", [GroupController::class, "addFiletoGroup"])->middleware('validate.group.creater');
+    Route::post("addMembertoGroup", [GroupController::class, "addMembertoGroup"])->middleware('validate.group.creater');
     Route::get("showUsers", [UserController::class, "showUsers"]);
     Route::post("checkin", [FileController::class, "checkin"]);
     Route::post("checkout", [FileController::class, "checkout"]);

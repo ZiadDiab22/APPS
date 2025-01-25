@@ -40,7 +40,7 @@ class Kernel extends HttpKernel
 
         'api' => [
             // \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
-            \Illuminate\Routing\Middleware\ThrottleRequests::class.':api',
+            // \Illuminate\Routing\Middleware\ThrottleRequests::class.':api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ],
     ];
@@ -67,5 +67,6 @@ class Kernel extends HttpKernel
         'validate.file.inputs' => \App\Http\Middleware\ValidateAddfileInputs::class,
         'validate.login.inputs' => \App\Http\Middleware\ValidateLoginInputs::class,
         'validate.group.inputs' => \App\Http\Middleware\ValidateAddgroupInputs::class,
+        'validate.group.creater' => \App\Http\Middleware\ValidateGroupCreater::class,
     ];
 }
